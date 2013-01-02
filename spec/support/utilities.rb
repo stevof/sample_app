@@ -31,13 +31,12 @@ RSpec::Matchers.define :have_error_message do |message|
   end
 end
 
-<<<<<<< HEAD
 RSpec::Matchers.define :have_success_message do |message|
 	match do |page|
 		page.should have_selector('div.alert.alert-success', text: 'Welcome')
 	end
 end
-=======
+
 def sign_in(user)
   visit signin_path
   fill_in "Email",    with: user.email
@@ -48,4 +47,3 @@ def sign_in(user)
 end
 
 include ApplicationHelper
->>>>>>> updating-users

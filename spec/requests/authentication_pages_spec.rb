@@ -28,16 +28,7 @@ describe "Authentication" do
 
     describe "with valid information" do
       let(:user) { FactoryGirl.create(:user) }
-<<<<<<< HEAD
-      # before do
-      #   fill_in "Email",    with: user.email
-      #   fill_in "Password", with: user.password
-      #   click_button "Sign in"
-      # end
-      before { valid_signin(user) }
-=======
       before { sign_in user }
->>>>>>> updating-users
 
       it { should have_selector('title', text: user.name) }
 
