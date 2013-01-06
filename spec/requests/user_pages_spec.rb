@@ -5,10 +5,11 @@ describe "User pages" do
   subject { page }
 
   describe "index" do
-
+    puts "SPEC: create user"
     let(:user) { FactoryGirl.create(:user) }
 
     before(:each) do
+      "SPEC: sign in and visit users path"
       sign_in user
       visit users_path
     end
@@ -46,8 +47,39 @@ describe "User pages" do
           expect { click_link('delete') }.to change(User, :count).by(-1)
         end
         it { should_not have_link('delete', href: user_path(admin)) }
+      
       end
     end
+  end
+
+  describe "admin should not be able to delete himself via DELETE request" do
+    puts 'SPEC: create admin'
+    let(:admin) { FactoryGirl.create(:admin) }
+    before(:all) do
+      puts "SPEC: sign in and send DELETE request"
+      sign_in admin
+      delete user_path(admin)
+    end
+
+    # doesn't work, throws:
+    #   undefined method `save_and_open_page' for Capybara::Session:Class (NoMethodError)
+    # I thought installing the 'launchy' gem would fix this, but no. Can't figure it out for now. 
+    #Capybara::Session.save_and_open_page
+    
+    it "should not change user count" do
+      expect { response.not_to change(User.count) }
+    end
+    specify { response.should redirect_to(users_path) }
+    
+    # this line isnt working, and I don't know why. 
+    # the test on the line above passess, which confirms we got redirected to the
+    # users page as expected.
+    # I can't manually test it because it's sending a DELETE request (not a button click).
+    # I tried to use the Capybara save_and_open_page method to see what's actually happening
+    # but see above -- can't get that to work.
+    #specify { page.should have_error_message('You cannot destroy yourself') }
+
+    specify { page.should_not have_success_message('User destroyed') }
   end
 
   describe "profile page" do

@@ -1,5 +1,6 @@
 class UsersController < ApplicationController
   before_filter :signed_in_user, only: [:index, :edit, :update, :destroy]
+  before_filter :signed_in_user_prevent_signup, only: [:new, :create]
   before_filter :correct_user,   only: [:edit, :update]
   before_filter :admin_user,     only: :destroy
 
@@ -40,9 +41,24 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    User.find(params[:id]).destroy
-    flash[:success] = "User destroyed."
+    @user_to_delete = User.find(params[:id])
+    puts
+    puts "users_controller debug info:"
+    puts "params[:id]: #{params[:id]}"
+    puts "@user_to_delete: #{@user_to_delete.id}"
+    puts "current_user.id: #{current_user.id}"
+
+    # user should not be able to destroy himself
+    if current_user?(@user_to_delete)
+      puts "--Current user can't delete yourself"
+      flash[:error] = "You cannot destroy yourself. What's your problem? Are you mentally unstable? Seek help immediately."
+    else
+      puts "--User deleted"
+      User.find(params[:id]).destroy
+      flash[:success] = "User destroyed."
+    end
     redirect_to users_url
+    puts
   end
 
   private
@@ -51,6 +67,13 @@ class UsersController < ApplicationController
       unless signed_in?
         store_location
         redirect_to signin_url, notice: "Please sign in."
+      end
+    end
+
+    def signed_in_user_prevent_signup
+      if signed_in?
+        redirect_to root_path,
+                    notice: "You are already a user. Why are you trying to sign up again? Sign out if you want to do that. Geez."
       end
     end
 

@@ -20,9 +20,12 @@ describe "Authentication" do
       it { should have_selector('title', text: 'Sign in') }
       it { should have_error_message('Invalid') }
 
-       describe "after visiting another page" do
+      describe "after visiting another page" do
         before { click_link "Home" }
         it { should_not have_error_message('Invalid') }
+        
+        it { should_not have_link('Profile') }
+        it { should_not have_link('Settings') }
       end
     end
 
@@ -62,6 +65,25 @@ describe "Authentication" do
         describe "after signing in" do
           it "should render the desired protected page" do
             page.should have_selector('title', text: 'Edit user')
+          end
+
+          describe "when signing in again" do
+            before do
+              delete signout_path
+              sign_in user
+            end
+
+            it "should render the default (profile) page" do
+              page.should have_selector('title', text: user.name) 
+            end
+          end
+
+          describe "tries to access sign up page" do
+            # a signed-in user should not be able to access the signup page.
+            # they should be redirected back to the home page, with a message shown.
+            before { visit signup_path }
+            it { should have_selector('title', text: full_title('')) }
+            it { should have_notice_message('You are already a user') }
           end
         end
       end
